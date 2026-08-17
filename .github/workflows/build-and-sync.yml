@@ -1,0 +1,81 @@
+name: Build and Sync to main
+
+# Merges the /shared submodule with the /brand-acme override folder and publishes
+# the flattened result to the `main` branch. EDS serves files directly from `main`,
+# so there is no build step beyond this flatten-and-copy.
+
+on:
+  push:
+    branches:
+      - source
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-sync:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out the `source` branch with submodules (pulls in /shared).
+      #    The /shared submodule is a public repo, so the default GITHUB_TOKEN
+      #    can clone it - no extra token needed.
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: source
+          submodules: recursive
+          path: source
+
+      # 2. Check out the `main` branch into a separate directory so we can replace
+      #    its contents and push. Uses the default GITHUB_TOKEN (needs contents: write).
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: publish
+
+      # 3 + 4. Build the merged tree: /shared first, then /brand-acme on top so the
+      #        brand override wins on any conflicting files.
+      - name: Build merged output
+        run: |
+          set -euo pipefail
+          MERGED="$RUNNER_TEMP/merged"
+          rm -rf "$MERGED"
+          mkdir -p "$MERGED"
+
+          echo "Copying /shared into merged output..."
+          cp -a source/shared/. "$MERGED/"
+
+          echo "Overlaying /brand-acme on top (brand-acme wins on conflicts)..."
+          cp -a source/brand-acme/. "$MERGED/"
+
+          # 5. Strip any git / submodule scaffolding so it can't leak into main.
+          echo "Removing git and submodule scaffolding from merged output..."
+          rm -f "$MERGED/.gitmodules"
+          find "$MERGED" -name '.git' -exec rm -rf {} +
+
+      # 6 + 7. Replace main's tracked files (keep .git and .github), copy in the
+      #        merged output, and commit/push only if something actually changed.
+      - name: Publish to main
+        run: |
+          set -euo pipefail
+          MERGED="$RUNNER_TEMP/merged"
+          cd publish
+
+          git config user.name "eds-sync-bot"
+          git config user.email "eds-sync-bot@users.noreply.github.com"
+
+          echo "Clearing existing files (preserving .git and .github)..."
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+
+          echo "Copying merged output into main working tree..."
+          cp -a "$MERGED/." .
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to publish - skipping commit."
+          else
+            git commit -m "chore: sync shared + brand-acme to main"
+            git push origin main
+          fi
