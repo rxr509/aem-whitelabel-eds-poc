@@ -1,0 +1,30 @@
+footer {
+  background-color: var(--footer-bg, var(--light-color));
+  color: var(--footer-text, var(--text-color));
+  font-size: var(--body-font-size-xs);
+}
+
+footer .footer > div {
+  margin: auto;
+  max-width: var(--section-max-width, 1200px);
+  padding: var(--spacing-10, 40px) var(--spacing-6, 24px) var(--spacing-6, 24px);
+}
+
+footer .footer p {
+  margin: 0;
+}
+
+footer .footer a:any-link {
+  color: var(--link-color);
+  transition: color var(--transition-fast, 150ms) var(--transition-easing);
+}
+
+footer .footer a:hover {
+  color: var(--link-hover-color);
+}
+
+@media (width >= 900px) {
+  footer .footer > div {
+    padding: var(--spacing-10, 40px) var(--spacing-8, 32px) var(--spacing-6, 24px);
+  }
+}

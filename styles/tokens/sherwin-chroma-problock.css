@@ -1,0 +1,27 @@
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --sherwin-chroma-color-blue-5: rgba(93.333%, 96.863%, 100%);
+  --sherwin-chroma-color-red-10: rgba(96.863%, 91.373%, 91.373%);
+  --sherwin-chroma-color-red-40: rgba(83.922%, 53.725%, 52.941%);
+  --sherwin-chroma-color-red-67-red: rgba(71.765%, 18.431%, 16.471%);
+  --sherwin-chroma-color-red-80: rgba(56.471%, 14.51%, 12.941%);
+  --sherwin-chroma-color-red-90: rgba(40%, 10.196%, 9.0196%);
+  --sherwin-chroma-color-gray-5: rgba(95.686%, 96.471%, 97.255%);
+  --sherwin-chroma-color-gray-10: rgba(91.765%, 92.549%, 93.725%);
+  --sherwin-chroma-color-gray-20: rgba(83.137%, 83.922%, 85.49%);
+  --sherwin-chroma-color-gray-40: rgba(61.176%, 61.961%, 63.137%);
+  --sherwin-chroma-color-gray-47-gray: rgba(50.196%, 50.98%, 52.157%);
+  --sherwin-chroma-color-gray-70: rgba(36.078%, 36.471%, 37.255%);
+  --sherwin-chroma-color-gray-90: rgba(20.784%, 21.176%, 21.569%);
+  --sherwin-chroma-color-blue-10: rgba(85.882%, 93.725%, 99.608%);
+  --sherwin-chroma-color-blue-30: rgba(52.941%, 76.471%, 95.294%);
+  --sherwin-chroma-color-blue-50: rgba(10.98%, 47.843%, 77.255%);
+  --sherwin-chroma-color-blue-70: rgba(1.9608%, 37.255%, 65.098%);
+  --sherwin-chroma-color-blue-81-blue: rgba(0%, 29.804%, 53.333%);
+  --sherwin-chroma-color-blue-90: rgba(1.5686%, 21.569%, 37.647%);
+  --sherwin-chroma-text-family-montserrat: Montserrat;
+  --sherwin-chroma-white: rgba(100%, 100%, 100%);
+}

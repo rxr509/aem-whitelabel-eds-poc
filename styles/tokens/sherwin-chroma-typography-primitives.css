@@ -1,0 +1,31 @@
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --sherwin-chroma-size-025: 11px;
+  --sherwin-chroma-size-050: 12px;
+  --sherwin-chroma-size-075: 14px;
+  --sherwin-chroma-size-100: 16px;
+  --sherwin-chroma-size-200: 18px;
+  --sherwin-chroma-size-300: 20px;
+  --sherwin-chroma-size-400: 22px;
+  --sherwin-chroma-size-500: 25px;
+  --sherwin-chroma-size-600: 28px;
+  --sherwin-chroma-size-700: 32px;
+  --sherwin-chroma-size-800: 36px;
+  --sherwin-chroma-size-900: 40px;
+  --sherwin-chroma-size-1000: 45px;
+  --sherwin-chroma-size-1100: 50px;
+  --sherwin-chroma-size-1200: 56px;
+  --sherwin-chroma-size-1300: 63px;
+  --sherwin-chroma-size-1400: 70px;
+  --sherwin-chroma-weight-200: 200;
+  --sherwin-chroma-weight-400: 400;
+  --sherwin-chroma-weight-500: 500;
+  --sherwin-chroma-weight-600: 600;
+  --sherwin-chroma-weight-700: 700;
+  --sherwin-chroma-weight-800: 800;
+  --sherwin-chroma-family-sw-dropcloth-vf: SW Dropcloth VF;
+  --sherwin-chroma-family-open-sans: Open Sans;
+}
