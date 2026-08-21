@@ -55,6 +55,11 @@ jobs:
           rm -f "$MERGED/.gitmodules"
           find "$MERGED" -name '.git' -exec rm -rf {} +
 
+          # main should only contain deployable site code, not CI/workflow files.
+          # Dropping .github also avoids needing the `workflows` push permission.
+          echo "Removing .github from merged output..."
+          rm -rf "$MERGED/.github"
+
       # 6 + 7. Replace main's tracked files (keep .git and .github), copy in the
       #        merged output, and commit/push only if something actually changed.
       - name: Publish to main
