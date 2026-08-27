@@ -1,0 +1,53 @@
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --sherwin-chroma-neutral-10: rgba(92.549%, 92.549%, 92.549%);
+  --sherwin-chroma-neutral-20: rgba(83.922%, 83.922%, 83.922%);
+  --sherwin-chroma-neutral-30: rgba(73.725%, 73.725%, 73.725%);
+  --sherwin-chroma-neutral-40: rgba(61.961%, 61.961%, 61.961%);
+  --sherwin-chroma-neutral-50: rgba(46.667%, 46.667%, 46.667%);
+  --sherwin-chroma-neutral-70: rgba(29.804%, 29.804%, 29.804%);
+  --sherwin-chroma-neutral-90: rgba(14.51%, 14.51%, 14.51%);
+  --sherwin-chroma-light-transparent-90: rgba(255, 255, 255, 0.9);
+  --sherwin-chroma-dark-transparent-40: rgba(0, 0, 0, 0.4);
+  --sherwin-chroma-dark-transparent-70: rgba(0, 0, 0, 0.7);
+  --sherwin-chroma-white: rgba(100%, 100%, 100%);
+  --sherwin-chroma-black: rgba(0%, 0%, 0%);
+  --sherwin-chroma-transparent: rgba(0, 0, 0, 0);
+  --sherwin-chroma-red-10: rgba(100%, 90.196%, 90.98%);
+  --sherwin-chroma-red-30: rgba(99.216%, 64.314%, 67.059%);
+  --sherwin-chroma-red-48: rgba(93.725%, 20%, 25.098%);
+  --sherwin-chroma-red-50: rgba(87.843%, 18.824%, 23.529%);
+  --sherwin-chroma-red-70: rgba(54.902%, 15.686%, 18.431%);
+  --sherwin-chroma-red-90: rgba(22.745%, 10.98%, 11.765%);
+  --sherwin-chroma-blue-10: rgba(88.627%, 92.941%, 99.608%);
+  --sherwin-chroma-blue-20: rgba(76.078%, 84.314%, 99.216%);
+  --sherwin-chroma-blue-30: rgba(60.784%, 74.51%, 97.255%);
+  --sherwin-chroma-blue-50: rgba(20.392%, 45.098%, 87.451%);
+  --sherwin-chroma-blue-60: rgba(10.196%, 36.863%, 81.961%);
+  --sherwin-chroma-blue-70: rgba(0.78431%, 26.275%, 70.196%);
+  --sherwin-chroma-blue-73: rgba(0%, 23.922%, 64.706%);
+  --sherwin-chroma-blue-90: rgba(4.7059%, 14.118%, 29.412%);
+  --sherwin-chroma-purple-44: rgba(64.706%, 46.667%, 69.804%);
+  --sherwin-chroma-yellow-23: rgba(97.255%, 79.216%, 15.294%);
+  --sherwin-chroma-orange-10: rgba(100%, 90.98%, 84.706%);
+  --sherwin-chroma-orange-30: rgba(98.039%, 66.667%, 45.882%);
+  --sherwin-chroma-orange-42: rgba(91.765%, 45.098%, 14.118%);
+  --sherwin-chroma-orange-50: rgba(72.549%, 36.471%, 12.549%);
+  --sherwin-chroma-orange-60: rgba(60.392%, 31.373%, 12.549%);
+  --sherwin-chroma-orange-70: rgba(44.314%, 25.098%, 12.157%);
+  --sherwin-chroma-orange-90: rgba(19.216%, 13.333%, 9.4118%);
+  --sherwin-chroma-green-10: rgba(83.529%, 96.078%, 74.902%);
+  --sherwin-chroma-green-30: rgba(58.431%, 79.608%, 43.922%);
+  --sherwin-chroma-green-43: rgba(44.314%, 63.137%, 31.373%);
+  --sherwin-chroma-green-50: rgba(35.686%, 50.588%, 25.49%);
+  --sherwin-chroma-green-60: rgba(30.588%, 42.745%, 22.353%);
+  --sherwin-chroma-green-70: rgba(23.922%, 32.549%, 18.039%);
+  --sherwin-chroma-green-90: rgba(11.765%, 15.686%, 7.0588%);
+  --sherwin-chroma-pink-59: rgba(74.51%, 13.333%, 43.529%);
+  --sherwin-chroma-pink-70: rgba(55.686%, 11.373%, 33.333%);
+  --sherwin-chroma-teal-42: rgba(19.216%, 60.392%, 67.059%);
+  --sherwin-chroma-teal-60: rgba(13.725%, 42.745%, 47.451%);
+}

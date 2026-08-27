@@ -1,0 +1,5 @@
+mountpoints:
+  /:
+    url: https://<tenant>.sharepoint.com/sites/<site>/Shared%20Documents/<brand-acme>
+    type: markup
+    suffix: .docx

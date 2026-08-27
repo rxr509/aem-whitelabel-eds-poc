@@ -1,0 +1,35 @@
+.cards > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(257px, 1fr));
+  gap: var(--spacing-6, 24px);
+}
+
+.cards > ul > li {
+  border: 1px solid var(--card-border, var(--border-color, #dadada));
+  border-radius: var(--card-radius, var(--radius-lg, 0.5rem));
+  background-color: var(--card-bg, var(--background-color));
+  box-shadow: var(--card-shadow, var(--shadow-base));
+  overflow: hidden;
+  transition: box-shadow var(--transition-base, 200ms) var(--transition-easing);
+}
+
+.cards > ul > li:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.cards .cards-card-body {
+  padding: var(--card-padding, var(--spacing-4, 16px));
+}
+
+.cards .cards-card-image {
+  line-height: 0;
+}
+
+.cards > ul > li img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
