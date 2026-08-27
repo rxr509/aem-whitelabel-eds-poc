@@ -1,8 +1,8 @@
-name: Build and Sync to main
+name: Build and Sync to develop
 
 # Merges the /shared submodule with the /brand-acme override folder and publishes
-# the flattened result to the `main` branch. EDS serves files directly from `main`,
-# so there is no build step beyond this flatten-and-copy.
+# the flattened result to the `develop` branch. Changes reach `main` from `develop`
+# via pull request, so there is no build step beyond this flatten-and-copy.
 
 on:
   push:
@@ -27,12 +27,12 @@ jobs:
           submodules: recursive
           path: source
 
-      # 2. Check out the `main` branch into a separate directory so we can replace
+      # 2. Check out the `develop` branch into a separate directory so we can replace
       #    its contents and push. Uses the default GITHUB_TOKEN (needs contents: write).
-      - name: Checkout main
+      - name: Checkout develop
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: develop
           path: publish
 
       # 3 + 4. Build the merged tree: /shared first, then /brand-acme on top so the
@@ -55,14 +55,14 @@ jobs:
           rm -f "$MERGED/.gitmodules"
           find "$MERGED" -name '.git' -exec rm -rf {} +
 
-          # main should only contain deployable site code, not CI/workflow files.
+          # develop should only contain deployable site code, not CI/workflow files.
           # Dropping .github also avoids needing the `workflows` push permission.
           echo "Removing .github from merged output..."
           rm -rf "$MERGED/.github"
 
-      # 6 + 7. Replace main's tracked files (keep .git and .github), copy in the
+      # 6 + 7. Replace develop's tracked files (keep .git and .github), copy in the
       #        merged output, and commit/push only if something actually changed.
-      - name: Publish to main
+      - name: Publish to develop
         run: |
           set -euo pipefail
           MERGED="$RUNNER_TEMP/merged"
@@ -74,13 +74,13 @@ jobs:
           echo "Clearing existing files (preserving .git and .github)..."
           find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
 
-          echo "Copying merged output into main working tree..."
+          echo "Copying merged output into develop working tree..."
           cp -a "$MERGED/." .
 
           git add -A
           if git diff --cached --quiet; then
             echo "No changes to publish - skipping commit."
           else
-            git commit -m "chore: sync shared + brand-acme to main"
-            git push origin main
+            git commit -m "chore: sync shared + brand-acme to develop"
+            git push origin develop
           fi
