@@ -1,8 +1,12 @@
 name: Build and Sync to develop
 
 # Merges the /shared submodule with the /brand-acme override folder and publishes
-# the flattened result to the `develop` branch. Changes reach `main` from `develop`
-# via pull request, so there is no build step beyond this flatten-and-copy.
+# the flattened result to the `develop` branch, which is the default branch and the
+# one Edge Delivery serves. There is no build step beyond this flatten-and-copy.
+#
+# `develop` is fully machine-generated: the publish step wipes it on every run.
+# Never commit site code directly to `develop` - author it in /brand-acme (or the
+# /shared submodule) on the `source` branch instead, or it will be overwritten.
 
 on:
   push:
