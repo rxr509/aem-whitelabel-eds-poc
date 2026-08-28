@@ -1,5 +1,2 @@
 mountpoints:
-  /:
-    url: https://<tenant>.sharepoint.com/sites/<site>/Shared%20Documents/<brand-acme>
-    type: markup
-    suffix: .docx
+  /: https://content.da.live/kxs692/aem-whitelabel-boilerplate/
