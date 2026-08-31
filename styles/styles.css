@@ -223,7 +223,7 @@ main > .section:first-of-type {
 /* section metadata */
 main .section.light,
 main .section.highlight {
-  background-color: green;
+  background-color: rgb(0, 73, 128);
   margin: 0;
   padding: 40px 0;
 }
