@@ -1,4 +1,237 @@
+/*
+ * Theme Configuration
+ *
+ * This file maps Sherwin-Williams Chroma design tokens to the project's CSS custom properties.
+ * Import this file in styles.css to apply the theme across all components.
+ *
+ * The mapping follows this pattern:
+ * --project-property: var(--sherwin-chroma-token);
+ *
+ * Available token themes:
+ * - sherwin-chroma-enterprise-default.css (Enterprise/Corporate theme)
+ * - sherwin-chroma-valspar-default.css (Valspar brand)
+ * - sherwin-chroma-minwax-default.css (Minwax brand)
+ * - sherwin-chroma-krylon-default.css (Krylon brand)
+ * - And more...
+ *
+ * Change the import below to switch brand themes.
+ */
+
+/* Import the Chroma design tokens - change this to switch themes */
+@import url('/styles/tokens/sherwin-chroma-enterprise-default.css');
+
 :root {
-  --link-color: #000000;
-  --font-family-base: 'Georgia', serif;
+  /* =============================================
+   * COLOR MAPPING
+   * ============================================= */
+
+  /* Background colors */
+  --background-color: #ffffff;
+  --light-color: var(--sherwin-chroma-color-neutral-lighter, #ececec);
+  --dark-color: var(--sherwin-chroma-color-neutral-dark, #4c4c4c);
+  --surface-color: #ffffff;
+
+  /* Text colors */
+  --text-color: var(--sherwin-chroma-color-neutral-darker, #252525);
+  --text-color-secondary: var(--sherwin-chroma-color-neutral-default, #777777);
+  --text-color-inverse: #ffffff;
+
+  /* Brand colors */
+  --brand-primary: var(--sherwin-chroma-color-brand-default, #003da5);
+  --brand-secondary: var(--sherwin-chroma-color-brand-dark, #0c2447);
+  --brand-accent: var(--sherwin-chroma-color-brand-light, #3473df);
+  --brand-lighter: var(--sherwin-chroma-color-brand-lighter, #c2d7fd);
+
+  /* Link colors - using primary color tokens */
+  --link-color: var(--sherwin-chroma-color-primary-default, #3473df);
+  --link-hover-color: var(--sherwin-chroma-color-primary-dark, #0243b3);
+
+  /* Border colors */
+  --border-color: var(--sherwin-chroma-color-neutral-lighter, #ececec);
+  --border-color-strong: var(--sherwin-chroma-color-neutral-light, #bcbcbc);
+
+  /* Status colors */
+  --color-success: var(--sherwin-chroma-color-validation-positive-default, #5b8141);
+  --color-warning: var(--sherwin-chroma-color-validation-warning-default, #b95d20);
+  --color-error: var(--sherwin-chroma-color-validation-negative-default, #e0303c);
+  --color-info: var(--sherwin-chroma-color-validation-info-default, #3473df);
+
+  /* Disabled state */
+  --color-disabled: var(--sherwin-chroma-color-disabled, rgba(0, 0, 0, 0.4));
+
+  /* =============================================
+   * TYPOGRAPHY MAPPING
+   * ============================================= */
+
+  /* Font families - Chroma uses SW Dropcloth VF, provide fallbacks */
+  --body-font-family: var(--sherwin-chroma-body-text-family-paragraph, 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  --heading-font-family: var(--sherwin-chroma-heading-text-family-xlarge, 'Oswald', 'Open Sans', sans-serif);
+  --mono-font-family: 'Roboto Mono', 'Courier New', monospace;
+
+  /* Font sizes from Chroma tokens */
+  --body-font-size-m: var(--sherwin-chroma-typography-size-medium, 1rem);
+  --body-font-size-s: var(--sherwin-chroma-typography-size-small, 0.88rem);
+  --body-font-size-xs: var(--sherwin-chroma-typography-size-xsmall, 0.75rem);
+
+  /* Heading font sizes */
+  --heading-font-size-xxl: var(--sherwin-chroma-typography-size-xxxlarge, 2.5rem);
+  --heading-font-size-xl: var(--sherwin-chroma-typography-size-xxlarge, 2rem);
+  --heading-font-size-l: var(--sherwin-chroma-typography-size-xlarge, 1.75rem);
+  --heading-font-size-m: var(--sherwin-chroma-typography-size-large, 1.25rem);
+  --heading-font-size-s: var(--sherwin-chroma-typography-size-medium, 1rem);
+  --heading-font-size-xs: var(--sherwin-chroma-typography-size-small, 0.88rem);
+
+  /* Font weights from Chroma tokens */
+  --font-weight-light: var(--sherwin-chroma-typography-weight-light, 200);
+  --font-weight-normal: var(--sherwin-chroma-typography-weight-regular, 400);
+  --font-weight-medium: var(--sherwin-chroma-typography-weight-bold, 500);
+  --font-weight-bold: var(--sherwin-chroma-typography-weight-extra-bold, 700);
+
+  /* Line heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* =============================================
+   * SPACING MAPPING (from Chroma padding tokens)
+   * ============================================= */
+  --spacing-0: var(--sherwin-chroma-space-padding-none, 0);
+  --spacing-1: var(--sherwin-chroma-space-padding-xxsmall, 2px);
+  --spacing-2: var(--sherwin-chroma-space-padding-xsmall, 4px);
+  --spacing-3: var(--sherwin-chroma-space-padding-small, 8px);
+  --spacing-4: var(--sherwin-chroma-space-padding-medium, 12px);
+  --spacing-5: var(--sherwin-chroma-space-padding-large, 16px);
+  --spacing-6: var(--sherwin-chroma-space-padding-xlarge, 20px);
+  --spacing-8: var(--sherwin-chroma-space-padding-xxlarge, 24px);
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+
+  /* Gap tokens from Chroma */
+  --gap-none: var(--sherwin-chroma-space-gap-none, 0);
+  --gap-xs: var(--sherwin-chroma-space-gap-xsmall, 2px);
+  --gap-sm: var(--sherwin-chroma-space-gap-small, 4px);
+  --gap-md: var(--sherwin-chroma-space-gap-medium, 8px);
+  --gap-lg: var(--sherwin-chroma-space-gap-large, 12px);
+  --gap-xl: var(--sherwin-chroma-space-gap-xlarge, 16px);
+  --gap-xxl: var(--sherwin-chroma-space-gap-xxlarge, 20px);
+
+  /* =============================================
+   * BORDER RADIUS MAPPING (from Chroma radius tokens)
+   * ============================================= */
+  --radius-none: var(--sherwin-chroma-size-radius-none, 0);
+  --radius-sm: var(--sherwin-chroma-size-radius-small, 2px);
+  --radius-base: var(--sherwin-chroma-size-radius-small, 2px);
+  --radius-md: var(--sherwin-chroma-size-radius-medium, 4px);
+  --radius-lg: var(--sherwin-chroma-size-radius-large, 8px);
+  --radius-xl: var(--sherwin-chroma-size-radius-xlarge, 12px);
+  --radius-full: 9999px;
+
+  /* =============================================
+   * BORDER WIDTH MAPPING
+   * ============================================= */
+  --border-width-thin: var(--sherwin-chroma-size-border-width-thin, 1px);
+  --border-width-medium: var(--sherwin-chroma-size-border-width-medium, 2px);
+  --border-width-thick: var(--sherwin-chroma-size-border-width-thick, 4px);
+
+  /* =============================================
+   * SHADOW MAPPING
+   * ============================================= */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* =============================================
+   * TRANSITION MAPPING
+   * ============================================= */
+  --transition-fast: 150ms;
+  --transition-base: 200ms;
+  --transition-slow: 300ms;
+  --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* =============================================
+   * Z-INDEX MAPPING
+   * ============================================= */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* =============================================
+   * COMPONENT-SPECIFIC TOKENS
+   * ============================================= */
+
+  /* Buttons - using Chroma button tokens */
+  --button-primary-bg: var(--sherwin-chroma-button-background-color-primary-default, var(--brand-primary));
+  --button-primary-bg-hover: var(--sherwin-chroma-button-background-color-primary-hovered);
+  --button-primary-text: var(--sherwin-chroma-button-text-color-primary-default, #ffffff);
+  --button-primary-hover-bg: var(--sherwin-chroma-button-background-color-primary-hovered, var(--link-hover-color));
+  --button-secondary-bg: var(--sherwin-chroma-button-background-color-secondary-default, transparent);
+  --button-secondary-text: var(--sherwin-chroma-button-text-color-secondary-default, var(--link-color));
+  --button-secondary-border: var(--sherwin-chroma-button-border-color-secondary-default, var(--link-color));
+  --button-radius: var(--sherwin-chroma-button-border-radius-default, var(--radius-sm));
+  --button-border-width: var(--sherwin-chroma-button-border-size-default, 1px);
+  --button-font-size-sm: var(--sherwin-chroma-button-text-size-small, 14px);
+  --button-font-size-md: var(--sherwin-chroma-button-text-size-medium, 16px);
+  --button-font-size-lg: var(--sherwin-chroma-button-text-size-large, 20px);
+  --button-font-weight: var(--sherwin-chroma-button-text-weight-default, 400);
+  --button-padding-x: var(--spacing-5);
+  --button-padding-y: var(--spacing-2);
+
+  /* Cards */
+  --card-bg: var(--surface-color);
+  --card-border: var(--border-color);
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-base);
+  --card-padding: var(--spacing-4);
+
+  /* Header/Navigation */
+  --nav-height: 64px;
+  --nav-bg: var(--background-color);
+  --nav-text: var(--text-color);
+  --nav-shadow: var(--shadow-sm);
+
+  /* Footer */
+  --footer-bg: var(--light-color);
+  --footer-text: var(--text-color);
+
+  /* Hero */
+  --hero-text: var(--text-color-inverse);
+  --hero-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Section */
+  --section-padding: var(--spacing-10);
+  --section-max-width: 1200px;
+
+  /* Focus indicator from Chroma */
+  --focus-ring-color: var(--sherwin-chroma-button-background-color-primary-focused, var(--link-color));
+  --focus-ring-width: var(--sherwin-chroma-button-border-size-focus-indicator, 2px);
+  --focus-ring-radius: var(--sherwin-chroma-button-border-radius-focus-indicator, 4px);
+}
+
+/* =============================================
+ * RESPONSIVE ADJUSTMENTS
+ * ============================================= */
+@media (width >= 900px) {
+  :root {
+    /* Adjust body font sizes for desktop */
+    --body-font-size-m: var(--sherwin-chroma-typography-size-small, 0.88rem);
+    --body-font-size-s: var(--sherwin-chroma-typography-size-xsmall, 0.75rem);
+    --body-font-size-xs: var(--sherwin-chroma-typography-size-xxsmall, 0.69rem);
+
+    /* Adjust heading sizes for desktop */
+    --heading-font-size-xxl: var(--sherwin-chroma-typography-size-xxlarge, 2rem);
+    --heading-font-size-xl: var(--sherwin-chroma-typography-size-xlarge, 1.75rem);
+    --heading-font-size-l: var(--sherwin-chroma-typography-size-large, 1.25rem);
+    --heading-font-size-m: var(--sherwin-chroma-typography-size-medium, 1rem);
+    --heading-font-size-s: var(--sherwin-chroma-typography-size-small, 0.88rem);
+    --heading-font-size-xs: var(--sherwin-chroma-typography-size-xsmall, 0.75rem);
+  }
 }
