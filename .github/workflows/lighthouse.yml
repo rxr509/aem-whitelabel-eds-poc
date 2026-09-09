@@ -185,8 +185,17 @@ jobs:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
+      # Deleted through the API rather than `git push --delete`, which needs a
+      # checked-out repo this job does not have. Absence is tolerated; any other
+      # failure is surfaced instead of being swallowed.
       - name: Delete preview branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push --quiet --delete \
-            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
-            "$PREVIEW_BRANCH" || echo "branch already gone"
+          set -euo pipefail
+          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${PREVIEW_BRANCH}" >/dev/null 2>&1; then
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${PREVIEW_BRANCH}" --silent
+            echo "deleted ${PREVIEW_BRANCH}"
+          else
+            echo "${PREVIEW_BRANCH} does not exist - nothing to do"
+          fi
