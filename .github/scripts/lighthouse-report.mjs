@@ -31,21 +31,41 @@ const METRICS = [
 ];
 
 // --- read this run's results ------------------------------------------------
-const manifestPath = join(LHCI_DIR, 'manifest.json');
-if (!existsSync(manifestPath)) {
-  throw new Error(`no Lighthouse manifest at ${manifestPath} - did \`lhci collect\` run?`);
-}
+// `lhci collect` writes lhr-<timestamp>.json but NOT manifest.json - that is
+// produced by `lhci upload`. So prefer the manifest when present, and otherwise
+// pick the median run straight from the raw LHR files.
+const readRun = () => {
+  const manifestPath = join(LHCI_DIR, 'manifest.json');
 
-const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-// LHCI marks the median of N runs as representative; using it keeps deltas from
-// tracking run-to-run jitter.
-const run = manifest.find((r) => r.isRepresentativeRun) ?? manifest[0];
-if (!run) throw new Error('Lighthouse manifest is empty');
+  if (existsSync(manifestPath)) {
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+    const rep = manifest.find((r) => r.isRepresentativeRun) ?? manifest[0];
+    if (rep?.jsonPath && existsSync(rep.jsonPath)) {
+      return { lhr: JSON.parse(readFileSync(rep.jsonPath, 'utf8')), count: manifest.length };
+    }
+  }
 
-const lhrFile = run.jsonPath && existsSync(run.jsonPath)
-  ? run.jsonPath
-  : join(LHCI_DIR, readdirSync(LHCI_DIR).find((f) => f.startsWith('lhr-') && f.endsWith('.json')));
-const lhr = JSON.parse(readFileSync(lhrFile, 'utf8'));
+  if (!existsSync(LHCI_DIR)) {
+    throw new Error(`${LHCI_DIR} does not exist - did \`lhci collect\` run?`);
+  }
+
+  const files = readdirSync(LHCI_DIR)
+    .filter((f) => /^lhr-.*\.json$/.test(f))
+    .map((f) => join(LHCI_DIR, f));
+
+  if (!files.length) {
+    throw new Error(`no lhr-*.json files in ${LHCI_DIR} - did \`lhci collect\` run?`);
+  }
+
+  // Median performance score, so deltas track real change rather than jitter.
+  const lhrs = files
+    .map((f) => JSON.parse(readFileSync(f, 'utf8')))
+    .sort((a, b) => (a.categories?.performance?.score ?? 0) - (b.categories?.performance?.score ?? 0));
+
+  return { lhr: lhrs[Math.floor(lhrs.length / 2)], count: lhrs.length };
+};
+
+const { lhr, count: runCount } = readRun();
 
 const scores = Object.fromEntries(
   CATEGORIES.map(([key]) => [key, Math.round((lhr.categories?.[key]?.score ?? 0) * 100)]),
@@ -56,7 +76,7 @@ const metrics = Object.fromEntries(
 );
 
 const current = {
-  url: run.url ?? lhr.finalDisplayedUrl ?? process.env.TARGET_URL ?? '',
+  url: lhr.finalDisplayedUrl ?? lhr.requestedUrl ?? process.env.TARGET_URL ?? '',
   sha: process.env.GITHUB_SHA ?? '',
   runUrl: process.env.RUN_URL ?? '',
   timestamp: new Date().toISOString(),
@@ -151,7 +171,7 @@ lines.push(
       + `\`${(previous.sha || '').slice(0, 7)}\` at ${previous.timestamp}.</sub>`
     : '<sub>First run on this branch — no baseline to compare against yet.</sub>',
   '',
-  `<sub>Median of ${manifest.length} run${manifest.length > 1 ? 's' : ''}. `
+  `<sub>Median of ${runCount} run${runCount > 1 ? 's' : ''}. `
   + 'Informational only; this check does not fail on low scores.'
   + (current.runUrl ? ` [Workflow run](${current.runUrl})` : '')
   + '</sub>',
