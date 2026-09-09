@@ -235,3 +235,8 @@
     --heading-font-size-xs: var(--sherwin-chroma-typography-size-xsmall, 0.75rem);
   }
 }
+
+/* Canary for the lint gate - delete once the check is confirmed working. */
+.lint-canary {
+  color: #ffffff;
+}
