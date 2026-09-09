@@ -1,0 +1,65 @@
+name: CodeQL
+
+# Informational security scanning. Does not block merges - no branch protection
+# references this workflow.
+#
+# Two languages are analysed:
+#   javascript-typescript - our authored JS. Today that is a single CI helper
+#     script, because brand-acme/ has no JS yet and all block/script code lives
+#     in the shared submodule, which we deliberately exclude. Coverage grows as
+#     blocks are authored in brand-acme/.
+#   actions - the workflows themselves. This is where the real exposure is right
+#     now: `${{ }}` interpolation into `run:` blocks, unpinned actions and
+#     over-broad permissions.
+
+on:
+  pull_request:
+  # A default-branch analysis is what gives the Security tab its baseline. Without
+  # it, PR scans have nothing to diff against and every finding looks new.
+  push:
+    branches: [source]
+  schedule:
+    # Mondays 04:00 UTC - re-scans unchanged code against newly published queries.
+    - cron: '0 4 * * 1'
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write   # upload SARIF results
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript, actions]
+
+    steps:
+      # Intentionally no `submodules:` - leaving shared/ empty is the most
+      # reliable exclusion, since nothing is on disk to analyse.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/codeql/codeql-config.yml
+
+      # No-op for JavaScript and Actions (neither is compiled), kept for parity
+      # with the standard CodeQL pipeline.
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"

@@ -1,0 +1,12 @@
+name: "CodeQL config"
+
+# shared/ is the aem-whitelabel-boilerplate submodule - upstream code we do not
+# own or patch. The workflow also checks out without submodules, so the
+# directory is empty at scan time; this entry is belt-and-braces and documents
+# the intent.
+paths-ignore:
+  - shared/**
+  - node_modules/**
+  - build/**
+  - "**/*.min.js"
+  - "**/package-lock.json"
