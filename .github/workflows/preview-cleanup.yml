@@ -23,19 +23,19 @@ jobs:
   reap:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - name: Delete preview branches for non-open PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
-          branches=$(git ls-remote --heads origin 'refs/heads/preview-pr-*' \
-            | awk '{print $2}' | sed 's#refs/heads/##')
+          branches=$(gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/heads/preview-pr-" \
+            --jq '.[].ref' | sed 's#refs/heads/##' || true)
 
           if [ -z "$branches" ]; then
             echo "No preview branches found."
+            echo "### Preview cleanup" >> "$GITHUB_STEP_SUMMARY"
+            echo "Nothing to do." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -50,7 +50,7 @@ jobs:
               kept=$((kept + 1))
             else
               echo "delete  $ref (PR #$n is $state)"
-              git push --quiet --delete origin "$ref" || echo "  already gone"
+              gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${ref}" --silent
               deleted=$((deleted + 1))
             fi
           done
