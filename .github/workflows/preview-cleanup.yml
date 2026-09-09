@@ -1,0 +1,62 @@
+name: Preview Cleanup
+
+# Safety net for orphaned preview-pr-* branches.
+#
+# lighthouse.yml deletes the preview branch on the pull_request `closed` event,
+# but that run does not always happen: GitHub resolves pull_request workflows
+# from the head ref, so closing a PR *and* deleting its branch in one action
+# (`gh pr close --delete-branch`) leaves no ref to resolve, and the run is never
+# started. Merged PRs are fine; closed-without-merge ones leak.
+#
+# This sweeps up whatever the event-driven path missed.
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  reap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Delete preview branches for non-open PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          branches=$(git ls-remote --heads origin 'refs/heads/preview-pr-*' \
+            | awk '{print $2}' | sed 's#refs/heads/##')
+
+          if [ -z "$branches" ]; then
+            echo "No preview branches found."
+            exit 0
+          fi
+
+          deleted=0
+          kept=0
+          for ref in $branches; do
+            n="${ref#preview-pr-}"
+            state=$(gh pr view "$n" --json state --jq .state 2>/dev/null || echo "MISSING")
+
+            if [ "$state" = "OPEN" ]; then
+              echo "keep    $ref (PR #$n is open)"
+              kept=$((kept + 1))
+            else
+              echo "delete  $ref (PR #$n is $state)"
+              git push --quiet --delete origin "$ref" || echo "  already gone"
+              deleted=$((deleted + 1))
+            fi
+          done
+
+          {
+            echo "### Preview cleanup"
+            echo
+            echo "Deleted **$deleted**, kept **$kept**."
+          } >> "$GITHUB_STEP_SUMMARY"
