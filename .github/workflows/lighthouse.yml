@@ -1,0 +1,192 @@
+name: Lighthouse
+
+# Informational Lighthouse check with run-over-run deltas.
+#
+# Never fails the PR on a low score - every scoring step is continue-on-error.
+# The value is the delta comment, not a gate.
+#
+# Why this publishes a preview branch first:
+#   head.html, scripts/ and styles/ all live inside the `shared` submodule, and
+#   AEM Code Sync does not resolve gitlinks. A raw feature-branch preview returns
+#   HTTP 200 but serves content with no CSS and no JS (those paths 404), which
+#   Lighthouse scores as near-perfect. Measuring that would be actively
+#   misleading, so we flatten shared + brand-acme onto a throwaway branch that
+#   Code Sync can serve, exactly as build-and-sync.yml does for develop.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: lighthouse-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write        # push/delete the preview branch
+  pull-requests: write   # upsert the comment
+  actions: read          # download the previous run's artifact
+
+env:
+  PREVIEW_BRANCH: preview-pr-${{ github.event.number }}
+  SITE: aem-whitelabel-eds-poc
+  OWNER: rxr509
+
+jobs:
+  lighthouse:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Same overlay as build-and-sync.yml: shared first, brand-acme wins.
+      - name: Build merged tree
+        run: |
+          set -euo pipefail
+          MERGED="$RUNNER_TEMP/merged"
+          rm -rf "$MERGED" && mkdir -p "$MERGED"
+          cp -a shared/. "$MERGED/"
+          cp -a brand-acme/. "$MERGED/"
+          rm -f "$MERGED/.gitmodules"
+          find "$MERGED" -name '.git' -exec rm -rf {} +
+          rm -rf "$MERGED/.github"
+
+      - name: Publish preview branch
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/merged"
+          git init -q -b "$PREVIEW_BRANCH"
+          git config user.name "eds-sync-bot"
+          git config user.email "eds-sync-bot@users.noreply.github.com"
+          git add -A
+          git commit -q -m "preview: PR #${{ github.event.number }} (${GITHUB_SHA::7})"
+          git push -q --force \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$PREVIEW_BRANCH"
+
+      - name: Wait for Code Sync
+        id: preview
+        run: |
+          set -euo pipefail
+          url="https://${PREVIEW_BRANCH}--${SITE}--${OWNER}.aem.page"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+          # A 200 on / is not enough - content renders even when the code branch
+          # has not synced. Waiting on aem.js is what proves the code is live.
+          for i in $(seq 1 30); do
+            page=$(curl -s -o /dev/null -w '%{http_code}' "$url/" || true)
+            js=$(curl -s -o /dev/null -w '%{http_code}' "$url/scripts/aem.js" || true)
+            echo "attempt $i: page=$page aem.js=$js"
+            if [ "$page" = "200" ] && [ "$js" = "200" ]; then
+              echo "ready=true" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            sleep 10
+          done
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          echo "::warning::preview never served /scripts/aem.js - skipping Lighthouse"
+
+      - name: Run Lighthouse CI
+        if: steps.preview.outputs.ready == 'true'
+        continue-on-error: true
+        run: |
+          npm install -g @lhci/cli@0.14.x
+          lhci collect \
+            --url="${{ steps.preview.outputs.url }}/" \
+            --numberOfRuns=3 \
+            --settings.preset=desktop
+
+      # Find the last completed run of THIS workflow on THIS branch. That run's
+      # artifact is the baseline.
+      - name: Locate previous run
+        if: steps.preview.outputs.ready == 'true'
+        id: prev
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          id=$(gh run list \
+            --workflow lighthouse.yml \
+            --branch "${{ github.head_ref }}" \
+            --status completed \
+            --limit 10 \
+            --json databaseId \
+            --jq "[.[] | select(.databaseId != ${{ github.run_id }})] | .[0].databaseId // empty")
+          echo "run_id=${id}" >> "$GITHUB_OUTPUT"
+          echo "previous run: ${id:-none}"
+
+      - name: Download previous scores
+        if: steps.prev.outputs.run_id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: lighthouse-scores
+          path: previous
+          run-id: ${{ steps.prev.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Fallback baseline: the JSON embedded in the existing PR comment, used
+      # when the artifact expired or the download above failed.
+      - name: Read baseline from existing comment
+        if: steps.preview.outputs.ready == 'true'
+        id: inline
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: context.issue.number, per_page: 100,
+            });
+            const prev = data.find((c) => c.body?.includes('<!-- lighthouse-report -->'));
+            const match = prev?.body.match(/<!-- lh-data:(.*?) -->/s);
+            core.setOutput('data', match ? match[1] : '');
+
+      - name: Build report
+        if: steps.preview.outputs.ready == 'true'
+        env:
+          PREVIOUS_JSON: previous/lighthouse-scores.json
+          PREVIOUS_INLINE: ${{ steps.inline.outputs.data }}
+          TARGET_URL: ${{ steps.preview.outputs.url }}/
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node .github/scripts/lighthouse-report.mjs
+
+      - name: Store scores for the next run
+        if: steps.preview.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-scores
+          path: lighthouse-scores.json
+          retention-days: 90
+
+      - name: Upsert PR comment
+        if: steps.preview.outputs.ready == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('lighthouse-comment.md', 'utf8');
+            const { data } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: context.issue.number, per_page: 100,
+            });
+            const existing = data.find((c) => c.body?.includes('<!-- lighthouse-report -->'));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                ...context.repo, comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                ...context.repo, issue_number: context.issue.number, body,
+              });
+            }
+
+  cleanup:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete preview branch
+        run: |
+          git push --quiet --delete \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$PREVIEW_BRANCH" || echo "branch already gone"
