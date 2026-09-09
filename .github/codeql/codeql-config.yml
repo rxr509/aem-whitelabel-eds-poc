@@ -1,5 +1,11 @@
 name: "CodeQL config"
 
+# security-extended adds lower-confidence security queries on top of the default
+# suite. Cheap here given how little code is in scope, and it covers the CI
+# script-injection class the default suite stays silent on.
+queries:
+  - uses: security-extended
+
 # shared/ is the aem-whitelabel-boilerplate submodule - upstream code we do not
 # own or patch. The workflow also checks out without submodules, so the
 # directory is empty at scan time; this entry is belt-and-braces and documents

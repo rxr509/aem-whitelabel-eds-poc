@@ -57,6 +57,9 @@ jobs:
           rm -rf "$MERGED/.github"
 
       - name: Publish preview branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.number }}
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/merged"
@@ -64,9 +67,9 @@ jobs:
           git config user.name "eds-sync-bot"
           git config user.email "eds-sync-bot@users.noreply.github.com"
           git add -A
-          git commit -q -m "preview: PR #${{ github.event.number }} (${GITHUB_SHA::7})"
+          git commit -q -m "preview: PR #${PR_NUMBER} (${GITHUB_SHA::7})"
           git push -q --force \
-            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
             "$PREVIEW_BRANCH"
 
       - name: Wait for Code Sync
@@ -93,28 +96,37 @@ jobs:
       - name: Run Lighthouse CI
         if: steps.preview.outputs.ready == 'true'
         continue-on-error: true
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
         run: |
           npm install -g @lhci/cli@0.14.x
           lhci collect \
-            --url="${{ steps.preview.outputs.url }}/" \
+            --url="${PREVIEW_URL}/" \
             --numberOfRuns=3 \
             --settings.preset=desktop
 
       # Find the last completed run of THIS workflow on THIS branch. That run's
       # artifact is the baseline.
+      #
+      # head_ref goes through the environment rather than into the script body:
+      # a fork PR author controls the branch name, and git permits $, backticks,
+      # quotes and semicolons in ref names.
       - name: Locate previous run
         if: steps.preview.outputs.ready == 'true'
         id: prev
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_REF: ${{ github.head_ref }}
+          RUN_ID: ${{ github.run_id }}
         run: |
+          set -euo pipefail
           id=$(gh run list \
             --workflow lighthouse.yml \
-            --branch "${{ github.head_ref }}" \
+            --branch "$HEAD_REF" \
             --status completed \
             --limit 10 \
             --json databaseId \
-            --jq "[.[] | select(.databaseId != ${{ github.run_id }})] | .[0].databaseId // empty")
+            --jq "[.[] | select(.databaseId != $RUN_ID)] | .[0].databaseId // empty")
           echo "run_id=${id}" >> "$GITHUB_OUTPUT"
           echo "previous run: ${id:-none}"
 
