@@ -26,15 +26,15 @@
    * ============================================= */
 
   /* Background colors */
-  --background-color: #ffffff;
+  --background-color: #fff;
   --light-color: var(--sherwin-chroma-color-neutral-lighter, #ececec);
   --dark-color: var(--sherwin-chroma-color-neutral-dark, #4c4c4c);
-  --surface-color: #ffffff;
+  --surface-color: #fff;
 
   /* Text colors */
   --text-color: var(--sherwin-chroma-color-neutral-darker, #252525);
-  --text-color-secondary: var(--sherwin-chroma-color-neutral-default, #777777);
-  --text-color-inverse: #ffffff;
+  --text-color-secondary: var(--sherwin-chroma-color-neutral-default, #777);
+  --text-color-inverse: #fff;
 
   /* Brand colors */
   --brand-primary: var(--sherwin-chroma-color-brand-default, #003da5);
@@ -57,7 +57,7 @@
   --color-info: var(--sherwin-chroma-color-validation-info-default, #3473df);
 
   /* Disabled state */
-  --color-disabled: var(--sherwin-chroma-color-disabled, rgba(0, 0, 0, 0.4));
+  --color-disabled: var(--sherwin-chroma-color-disabled, rgb(0 0 0 / 40%));
 
   /* =============================================
    * TYPOGRAPHY MAPPING
@@ -139,11 +139,11 @@
   /* =============================================
    * SHADOW MAPPING
    * ============================================= */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 5%);
+  --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px -1px rgb(0 0 0 / 10%);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -2px rgb(0 0 0 / 10%);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
 
   /* =============================================
    * TRANSITION MAPPING
@@ -171,7 +171,7 @@
   /* Buttons - using Chroma button tokens */
   --button-primary-bg: var(--sherwin-chroma-button-background-color-primary-default, var(--brand-primary));
   --button-primary-bg-hover: var(--sherwin-chroma-button-background-color-primary-hovered);
-  --button-primary-text: var(--sherwin-chroma-button-text-color-primary-default, #ffffff);
+  --button-primary-text: var(--sherwin-chroma-button-text-color-primary-default, #fff);
   --button-primary-hover-bg: var(--sherwin-chroma-button-background-color-primary-hovered, var(--link-hover-color));
   --button-secondary-bg: var(--sherwin-chroma-button-background-color-secondary-default, transparent);
   --button-secondary-text: var(--sherwin-chroma-button-text-color-secondary-default, var(--link-color));
@@ -204,7 +204,7 @@
 
   /* Hero */
   --hero-text: var(--text-color-inverse);
-  --hero-overlay: rgba(0, 0, 0, 0.4);
+  --hero-overlay: rgb(0 0 0 / 40%);
 
   /* Section */
   --section-padding: var(--spacing-10);
@@ -238,5 +238,5 @@
 
 /* Canary for the lint gate - delete once the check is confirmed working. */
 .lint-canary {
-  color: #ffffff;
+  color: #fff;
 }
