@@ -1,0 +1,23 @@
+{
+  "name": "aem-whitelabel-eds-poc-lint",
+  "private": true,
+  "description": "Lint toolchain for the source branch. Never published - build-and-sync.yml only copies shared/ and brand-acme/ into develop.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "npm run lint:css && npm run lint:js",
+    "lint:css": "stylelint --config shared/.stylelintrc.json --allow-empty-input \"brand-acme/**/*.css\"",
+    "eslintrc": "mkdir -p build && cp shared/.eslintrc.js build/eslintrc.cjs",
+    "lint:js": "npm run eslintrc && eslint --no-eslintrc -c build/eslintrc.cjs --resolve-plugins-relative-to . --no-error-on-unmatched-pattern \"brand-acme/**/*.js\"",
+    "lint:fix": "npm run lint:css -- --fix && npm run lint:js -- --fix"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "7.28.5",
+    "eslint": "8.57.1",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-plugin-import": "2.32.0",
+    "stylelint": "16.25.0",
+    "stylelint-config-standard": "39.0.1"
+  }
+}
