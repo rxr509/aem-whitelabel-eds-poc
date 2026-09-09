@@ -14,7 +14,7 @@ Author changes in the `source` branch:
 - Preview: https://develop--aem-whitelabel-eds-poc--rxr509.aem.page/
 - Live: https://develop--aem-whitelabel-eds-poc--rxr509.aem.live/
 
-`develop` is the default branch, so it also resolves without a branch prefix once
+`source` is the default branch, so it also resolves without a branch prefix once
 the site is configured.
 
 ## Site setup
