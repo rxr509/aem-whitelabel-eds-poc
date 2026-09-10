@@ -1,0 +1,10 @@
+shared_repo:
+  owner: kxs692
+  repo: aem-whitelabel-boilerplate
+  branch: demo
+
+subscribers:
+  - owner: rxr509
+    repo: aem-whitelabel-eds-poc
+    branch: source
+    interval_minutes: 5

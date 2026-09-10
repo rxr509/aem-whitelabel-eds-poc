@@ -1,0 +1,132 @@
+name: Check Shared Updates
+
+# Polls kxs692/aem-whitelabel-boilerplate@demo and pulls the submodule forward
+# when it moves. Nothing is required on the upstream side - it is read-only,
+# public, and unaware of us.
+#
+# Two things this works around:
+#
+# 1. A push made with GITHUB_TOKEN does NOT trigger other workflows, so pushing
+#    to `source` will not start build-and-sync.yml. It is dispatched explicitly
+#    instead, which keeps the default token sufficient.
+#
+# 2. State is kept on a dedicated branch, not on `source`. Recording a timestamp
+#    on every poll would otherwise add ~288 commits a day to the authoring
+#    branch.
+
+on:
+  schedule:
+    # GitHub's floor is 5 minutes, but scheduled runs are best-effort and
+    # commonly land later under load. Treat this as "within roughly 5-15
+    # minutes", not as a guarantee.
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Ignore interval_minutes and evaluate every subscriber now'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # commit the submodule bump, write the state branch
+  actions: write    # dispatch build-and-sync.yml
+
+concurrency:
+  group: check-shared-updates
+  cancel-in-progress: false
+
+env:
+  STATE_BRANCH: automation-state
+  STATE_FILE: .last-checked.json
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: source
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Single dependency rather than a full `npm ci`, since this runs often.
+      - name: Install YAML parser
+        run: npm install --no-save --no-audit --no-fund js-yaml@4
+
+      - name: Evaluate subscribers
+        id: evaluate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE: ${{ inputs.force || 'false' }}
+        run: node .github/scripts/check-shared-updates.mjs
+
+      - name: Pull shared submodule forward
+        if: steps.evaluate.outputs.should_update == 'true'
+        id: pull
+        run: |
+          set -euo pipefail
+          git config user.name "eds-sync-bot"
+          git config user.email "eds-sync-bot@users.noreply.github.com"
+
+          before=$(git rev-parse HEAD:shared)
+          git submodule update --remote shared
+          after=$(git -C shared rev-parse HEAD)
+
+          echo "shared: ${before:0:12} -> ${after:0:12}"
+
+          if git diff --quiet -- shared; then
+            echo "gitlink unchanged after --remote; nothing to commit"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git add shared
+          git commit -q -m "chore: auto-pull shared update (detected via scheduled check)"
+          git push origin source
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # GITHUB_TOKEN pushes are intentionally inert, so build-and-sync is asked
+      # to run rather than relied on to notice the push.
+      - name: Trigger build-and-sync
+        if: steps.pull.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run build-and-sync.yml --ref source
+          echo "dispatched build-and-sync.yml"
+
+      - name: Persist state
+        if: always() && steps.evaluate.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          content=$(node -e "process.stdout.write(Buffer.from(JSON.stringify(require('./state.json').state,null,2)+'\n').toString('base64'))")
+          sha=$(node -e "const s=require('./state.json').stateSha; process.stdout.write(s||'')")
+
+          args=(-X PUT "repos/${GITHUB_REPOSITORY}/contents/${STATE_FILE}"
+                -f message="chore: record shared poll state"
+                -f content="$content"
+                -f branch="${STATE_BRANCH}")
+          [ -n "$sha" ] && args+=(-f sha="$sha")
+
+          gh api "${args[@]}" --silent
+          echo "state written to ${STATE_BRANCH}/${STATE_FILE}"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Shared update check"
+            echo
+            echo '```json'
+            echo '${{ steps.evaluate.outputs.decision }}'
+            echo '```'
+            echo
+            echo "Pushed: ${{ steps.pull.outputs.pushed || 'false' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
