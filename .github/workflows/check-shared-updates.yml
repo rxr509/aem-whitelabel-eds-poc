@@ -11,8 +11,8 @@ name: Check Shared Updates
 #    instead, which keeps the default token sufficient.
 #
 # 2. State is kept on a dedicated branch, not on `source`. Recording a timestamp
-#    on every poll would otherwise add ~288 commits a day to the authoring
-#    branch.
+#    on every poll would otherwise put a commit on the authoring branch every
+#    time this runs.
 #
 # IF THE SUBMODULE SILENTLY STOPS UPDATING, READ THIS FIRST:
 # GitHub disables scheduled workflows automatically after 60 days with no
@@ -22,15 +22,16 @@ name: Check Shared Updates
 #
 #     gh workflow enable check-shared-updates.yml
 #
-# Separately, the 5 minute cron is a floor, not a promise: scheduled runs are
-# best-effort and routinely land 10-20 minutes late under load.
+# Schedules are best-effort. Expect the daily run to land within a few minutes
+# of 09:17 UTC most days, occasionally later. Use workflow_dispatch when an
+# update is needed sooner.
 
 on:
   schedule:
-    # GitHub's floor is 5 minutes, but scheduled runs are best-effort and
-    # commonly land later under load. Treat this as "within roughly 5-15
-    # minutes", not as a guarantee.
-    - cron: '*/5 * * * *'
+    # 09:17 UTC, deliberately off the top of the hour: GitHub's own guidance is
+    # that scheduled runs are most delayed at :00, when everyone else's crons
+    # fire. An odd minute avoids that queue.
+    - cron: '17 9 * * *'
   workflow_dispatch:
     inputs:
       force:

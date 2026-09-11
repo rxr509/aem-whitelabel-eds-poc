@@ -7,4 +7,12 @@ subscribers:
   - owner: rxr509
     repo: aem-whitelabel-eds-poc
     branch: source
-    interval_minutes: 5
+    # Minimum spacing between processed checks, NOT the polling cadence - the
+    # cron in check-shared-updates.yml decides that (daily, 09:17 UTC).
+    #
+    # Deliberately well under 1440. If this equalled the cron period, any day
+    # the run drifted late would push lastProcessedAt forward, and the next
+    # day's run would arrive just under 24h later and be skipped - silently
+    # halving the sync rate to every other day. 720 keeps the daily run always
+    # eligible while still guarding against rapid repeat dispatches.
+    interval_minutes: 720
