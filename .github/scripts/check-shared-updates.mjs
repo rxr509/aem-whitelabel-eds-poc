@@ -68,13 +68,14 @@ let decision = { shouldUpdate: false, upstreamSha, reason: 'no matching subscrib
 for (const sub of config.subscribers) {
   const key = `${sub.owner}/${sub.repo}`;
   const prev = state[key] ?? {};
-  const intervalMs = (sub.interval_minutes ?? 5) * 60_000;
+  // Floor only - absent means no floor, since the cron sets the cadence.
+  const minSpacingMs = (sub.min_spacing_minutes ?? 0) * 60_000;
   const lastProcessed = prev.lastProcessedAt ? Date.parse(prev.lastProcessedAt) : 0;
   const elapsed = now - lastProcessed;
-  const due = FORCE === 'true' || elapsed >= intervalMs;
+  const due = FORCE === 'true' || elapsed >= minSpacingMs;
 
   if (!due) {
-    const wait = Math.ceil((intervalMs - elapsed) / 60_000);
+    const wait = Math.ceil((minSpacingMs - elapsed) / 60_000);
     console.log(`${key}: not due yet (${wait} more minute(s))`);
     if (key.toLowerCase() === (GITHUB_REPOSITORY ?? '').toLowerCase()) {
       decision = { shouldUpdate: false, upstreamSha, reason: `not due yet (${wait} more minute(s))` };

@@ -35,7 +35,7 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: 'Ignore interval_minutes and evaluate every subscriber now'
+        description: 'Ignore min_spacing_minutes and evaluate every subscriber now'
         type: boolean
         default: false
 
