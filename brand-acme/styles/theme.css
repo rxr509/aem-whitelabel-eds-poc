@@ -235,3 +235,7 @@
     --heading-font-size-xs: var(--sherwin-chroma-typography-size-xsmall, 0.75rem);
   }
 }
+
+.lint-gate-test {
+  color: #ggg;
+}
