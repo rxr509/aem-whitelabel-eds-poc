@@ -4,15 +4,14 @@ name: Check Shared Updates
 # when it moves. Nothing is required on the upstream side - it is read-only,
 # public, and unaware of us.
 #
-# Two things this works around:
+# The push to `source` uses SYNC_BOT_TOKEN rather than GITHUB_TOKEN: a
+# GITHUB_TOKEN push neither triggers build-and-sync.yml nor satisfies a branch
+# ruleset. Because the PAT push does trigger workflows, build-and-sync is left
+# to fire on its own `push: source` trigger instead of being dispatched here.
 #
-# 1. A push made with GITHUB_TOKEN does NOT trigger other workflows, so pushing
-#    to `source` will not start build-and-sync.yml. It is dispatched explicitly
-#    instead, which keeps the default token sufficient.
-#
-# 2. State is kept on a dedicated branch, not on `source`. Recording a timestamp
-#    on every poll would otherwise put a commit on the authoring branch every
-#    time this runs.
+# State is kept on a dedicated branch, not on `source`. Recording a timestamp
+# on every poll would otherwise put a commit on the authoring branch every
+# time this runs.
 #
 # IF THE SUBMODULE SILENTLY STOPS UPDATING, READ THIS FIRST:
 # GitHub disables scheduled workflows automatically after 60 days with no
@@ -41,7 +40,6 @@ on:
 
 permissions:
   contents: write   # commit the submodule bump, write the state branch
-  actions: write    # dispatch build-and-sync.yml
 
 concurrency:
   group: check-shared-updates
@@ -80,6 +78,8 @@ jobs:
       - name: Pull shared submodule forward
         if: steps.evaluate.outputs.should_update == 'true'
         id: pull
+        env:
+          SYNC_TOKEN: ${{ secrets.SYNC_BOT_TOKEN }}
         run: |
           set -euo pipefail
           git config user.name "eds-sync-bot"
@@ -99,18 +99,30 @@ jobs:
 
           git add shared
           git commit -q -m "chore: auto-pull shared update (detected via scheduled check)"
+
+          if [ -z "${SYNC_TOKEN:-}" ]; then
+            echo "SYNC_BOT_TOKEN is empty - secret missing or revoked" >&2
+            exit 1
+          fi
+
+          # base64 is a derived value, so the runner's automatic masking of the
+          # raw secret does not cover it. Register it explicitly.
+          encoded=$(printf 'x-access-token:%s' "$SYNC_TOKEN" | base64 -w0)
+          echo "::add-mask::$encoded"
+
+          # Replaces the GITHUB_TOKEN header actions/checkout installed. Header
+          # form keeps the PAT out of the remote URL and out of push output.
+          git config --local --replace-all \
+            "http.https://github.com/.extraheader" \
+            "AUTHORIZATION: basic $encoded"
+
+          # SYNC_BOT_TOKEN has no expiry, so a 403 later means revoked or
+          # permissions changed, not lapsed. Fail loudly here rather than
+          # silently pushing with the checkout credential.
+          test "$(git config --local --get-all http.https://github.com/.extraheader | wc -l)" -eq 1
+
           git push origin source
           echo "pushed=true" >> "$GITHUB_OUTPUT"
-
-      # GITHUB_TOKEN pushes are intentionally inert, so build-and-sync is asked
-      # to run rather than relied on to notice the push.
-      - name: Trigger build-and-sync
-        if: steps.pull.outputs.pushed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run build-and-sync.yml --ref source
-          echo "dispatched build-and-sync.yml"
 
       - name: Persist state
         if: always() && steps.evaluate.outcome == 'success'

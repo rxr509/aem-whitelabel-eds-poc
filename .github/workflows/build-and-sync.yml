@@ -14,6 +14,12 @@ on:
       - source
   workflow_dispatch:
 
+# develop is force-written, so overlapping runs queue rather than cancel - a run
+# killed mid-push would leave develop in a partial state.
+concurrency:
+  group: build-and-sync-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
