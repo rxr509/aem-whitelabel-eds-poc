@@ -124,8 +124,11 @@ jobs:
           git push origin source
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
+      # lastSeenSha is computed at evaluate time, so recording it after a failed
+      # push would mark the update as done and no later run would retry it - the
+      # bump is abandoned until upstream happens to move again.
       - name: Persist state
-        if: always() && steps.evaluate.outcome == 'success'
+        if: always() && steps.evaluate.outcome == 'success' && steps.pull.outcome != 'failure'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
