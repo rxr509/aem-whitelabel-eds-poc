@@ -82,8 +82,10 @@ jobs:
           SYNC_TOKEN: ${{ secrets.SYNC_BOT_TOKEN }}
         run: |
           set -euo pipefail
-          git config user.name "eds-sync-bot"
-          git config user.email "eds-sync-bot@users.noreply.github.com"
+          # Resolvable GitHub identity, so the commit is attributed and does not
+          # trip require_extra_approval_for_unattributed_changes on the ruleset.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           before=$(git rev-parse HEAD:shared)
           git submodule update --remote shared
