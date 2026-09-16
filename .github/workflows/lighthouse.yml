@@ -42,7 +42,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       # Same overlay as build-and-sync.yml: shared first, brand-acme wins.
       - name: Build merged tree

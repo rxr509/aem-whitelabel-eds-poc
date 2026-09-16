@@ -3,7 +3,7 @@
   "private": true,
   "description": "Lint toolchain for the source branch. Never published - build-and-sync.yml only copies shared/ and brand-acme/ into develop.",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "lint": "npm run lint:css && npm run lint:js",
