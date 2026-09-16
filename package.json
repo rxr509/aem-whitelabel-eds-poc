@@ -6,7 +6,9 @@
     "node": ">=22"
   },
   "scripts": {
+    "dev": "node scripts/dev.mjs",
     "build:site": "node scripts/build-site.mjs",
+    "watch:site": "node scripts/watch-site.mjs",
     "lint": "npm run lint:css && npm run lint:js",
     "lint:css": "stylelint --config shared/.stylelintrc.json --allow-empty-input \"brand-acme/**/*.css\"",
     "eslintrc": "mkdir -p build && cp shared/.eslintrc.js build/eslintrc.cjs",
