@@ -187,6 +187,9 @@ point also reconsider:
 Author on `source`, in `brand-acme/` or the `shared` submodule. Open a pull
 request into `source`. Four checks must pass; no approval is needed.
 
+See [development.md](development.md) for the build, local preview and the
+gitignore whitelist.
+
 Run `npm run lint` locally before pushing. `Lint` runs `stylelint` over
 `brand-acme/**/*.css` and `eslint` over `brand-acme/**/*.js`, using configs from
 the `shared` submodule — so clone with `--recurse-submodules` or the configs
