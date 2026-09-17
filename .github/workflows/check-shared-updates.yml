@@ -62,7 +62,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       # Single dependency rather than a full `npm ci`, since this runs often.
       - name: Install YAML parser
