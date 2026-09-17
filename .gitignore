@@ -1,3 +1,21 @@
-node_modules/
-build/
-.DS_Store
+# Whitelist model: ignore everything at the root except the things that
+# belong on `source`. New tools drop new artifacts (dist/, .cache/, coverage/)
+# and this ignores them by default instead of requiring a new rule each time.
+/*
+
+!/.github/
+!/brand-acme/
+!/docs/
+!/scripts/
+!/shared
+
+!/.gitignore
+!/.gitmodules
+!/SUBSCRIBERS.yml
+!/fstab.yaml
+!/package.json
+!/package-lock.json
+
+# macOS drops these inside every directory, including ones just un-ignored
+# above - /* alone (root-only) would not catch them there.
+**/.DS_Store
