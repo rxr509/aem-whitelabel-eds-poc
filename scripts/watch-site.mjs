@@ -100,7 +100,7 @@ export function startWatcher(target, brandDir) {
 }
 
 function main() {
-  const { brandId, rest } = parseBrandArg(process.argv.slice(2));
+  const { brandId, rest } = parseBrandArg(process.argv.slice(2), { prefix: 'watch-site', npmScript: 'watch:site' });
   const brandDir = resolveBrandDir(repoRoot, brandId, 'watch-site');
   const target = resolve(rest[0] ?? join(repoRoot, '..', 'aem-poc-preview'));
 

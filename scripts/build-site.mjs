@@ -122,7 +122,7 @@ function countFiles(dir) {
 }
 
 function main() {
-  const { brandId, rest } = parseBrandArg(process.argv.slice(2));
+  const { brandId, rest } = parseBrandArg(process.argv.slice(2), { prefix: 'build-site', npmScript: 'build:site' });
   const brandDir = resolveBrandDir(repoRoot, brandId, 'build-site');
   const target = resolveTarget(rest);
 
