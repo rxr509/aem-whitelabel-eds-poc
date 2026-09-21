@@ -5,9 +5,9 @@ name: CodeQL
 #
 # Two languages are analysed:
 #   javascript-typescript - our authored JS. Today that is a single CI helper
-#     script, because brand-acme/ has no JS yet and all block/script code lives
-#     in the shared submodule, which we deliberately exclude. Coverage grows as
-#     blocks are authored in brand-acme/.
+#     script, because brands/acme/ has no JS yet and all block/script code
+#     lives in the shared submodule, which we deliberately exclude. Coverage
+#     grows as blocks are authored under brands/.
 #   actions - the workflows themselves. This is where the real exposure is right
 #     now: `${{ }}` interpolation into `run:` blocks, unpinned actions and
 #     over-broad permissions.

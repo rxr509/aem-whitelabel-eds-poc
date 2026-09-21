@@ -1,11 +1,11 @@
-# AEM Whitelabel EDS POC - brand-acme
+# AEM Whitelabel EDS POC - brands/acme
 
 Generated site code. **Do not edit this branch directly** - it is rebuilt from
 scratch by the `Build and Sync to develop` workflow on every push to `source`.
 
 Author changes in the `source` branch:
 
-- `/brand-acme` - brand-specific overrides (wins on conflicts)
+- `/brands/acme` - brand-specific overrides (wins on conflicts)
 - `/shared` - submodule pointing at [kxs692/aem-whitelabel-boilerplate](https://github.com/kxs692/aem-whitelabel-boilerplate) (`demo` branch)
 
 ## Environments

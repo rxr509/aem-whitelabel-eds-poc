@@ -1,11 +1,12 @@
 name: Build and Sync to develop
 
-# Merges the /shared submodule with the /brand-acme override folder and publishes
-# the flattened result to the `develop` branch, which is the default branch and the
-# one Edge Delivery serves. There is no build step beyond this flatten-and-copy.
+# Merges the /shared submodule with the active brand's override folder under
+# /brands and publishes the flattened result to the `develop` branch, which is
+# the default branch and the one Edge Delivery serves. There is no build step
+# beyond this flatten-and-copy.
 #
 # `develop` is fully machine-generated: the publish step wipes it on every run.
-# Never commit site code directly to `develop` - author it in /brand-acme (or the
+# Never commit site code directly to `develop` - author it under /brands (or the
 # /shared submodule) on the `source` branch instead, or it will be overwritten.
 
 on:
@@ -52,10 +53,12 @@ jobs:
 
       # 3 + 4 + 5. scripts/build-site.mjs is the same script a developer runs
       #            locally via `npm run build:site` - it merges shared/ then
-      #            brand-acme/ on top, strips git/CI scaffolding, and writes
-      #            straight into the develop checkout (preserving .git and
-      #            .github there). Actions invokes the build now, it no
-      #            longer owns the assembly logic.
+      #            the active brand's folder under brands/ on top, strips
+      #            git/CI scaffolding, and writes straight into the develop
+      #            checkout (preserving .git and .github there). Actions
+      #            invokes the build now, it no longer owns the assembly
+      #            logic. No --brand flag is passed, so it defaults to acme -
+      #            unchanged behaviour.
       - name: Build site
         run: |
           cd source
@@ -74,6 +77,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish - skipping commit."
           else
-            git commit -m "chore: sync shared + brand-acme to develop"
+            git commit -m "chore: sync shared + brands/acme to develop"
             git push origin develop
           fi

@@ -10,8 +10,9 @@ name: Lighthouse
 #   AEM Code Sync does not resolve gitlinks. A raw feature-branch preview returns
 #   HTTP 200 but serves content with no CSS and no JS (those paths 404), which
 #   Lighthouse scores as near-perfect. Measuring that would be actively
-#   misleading, so we flatten shared + brand-acme onto a throwaway branch that
-#   Code Sync can serve, exactly as build-and-sync.yml does for develop.
+#   misleading, so we flatten shared + the active brand (brands/acme) onto a
+#   throwaway branch that Code Sync can serve, exactly as build-and-sync.yml
+#   does for develop.
 
 on:
   pull_request:
@@ -44,14 +45,16 @@ jobs:
         with:
           node-version: 22
 
-      # Same overlay as build-and-sync.yml: shared first, brand-acme wins.
+      # Same overlay as build-and-sync.yml: shared first, the active brand wins.
+      # Hardcoded to brands/acme - this workflow does its own flatten rather than
+      # calling build-site.mjs, and only one brand is active at a time.
       - name: Build merged tree
         run: |
           set -euo pipefail
           MERGED="$RUNNER_TEMP/merged"
           rm -rf "$MERGED" && mkdir -p "$MERGED"
           cp -a shared/. "$MERGED/"
-          cp -a brand-acme/. "$MERGED/"
+          cp -a brands/acme/. "$MERGED/"
           rm -f "$MERGED/.gitmodules"
           find "$MERGED" -name '.git' -exec rm -rf {} +
           rm -rf "$MERGED/.github"
