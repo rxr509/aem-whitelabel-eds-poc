@@ -1,6 +1,6 @@
 # aem-whitelabel-eds-poc
 
-AEM Edge Delivery Services white-label proof of concept. A shared boilerplate is
+AEM Edge Delivery Services white-label poc. A shared boilerplate is
 combined with brand-specific overrides and published to the branch Edge Delivery
 serves.
 
