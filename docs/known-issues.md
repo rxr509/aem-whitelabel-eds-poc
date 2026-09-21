@@ -8,20 +8,21 @@ and were deliberately preserved when the assembly logic was extracted into
 Fixing any of these is a behaviour change and should be decided on its own
 merits, not folded into a refactor.
 
-## 1. brand-acme can override files but cannot delete them
+## 1. A brand can override files but cannot delete them
 
 **Affects: the white-label model itself. Worth raising with Kevin.**
 
-The assembly copies `shared/` first, then overlays `brand-acme/` on top. Both
-copies *merge* into the output tree rather than replacing directories, so the
-overlay can only add files or overwrite files at colliding paths.
+The assembly copies `shared/` first, then overlays the active brand's folder
+under `brands/` on top. Both copies *merge* into the output tree rather than
+replacing directories, so the overlay can only add files or overwrite files at
+colliding paths.
 
 There is no mechanism for a brand to **suppress** a file that `shared/` ships.
 If the boilerplate adds `blocks/newsletter/`, every brand inherits it. A brand
 that does not want it has no way to express that — the only options are
 overwriting it with an empty stub, or changing the shared repo for everyone.
 
-Today exactly three paths collide, and `brand-acme` correctly wins all three:
+Today exactly three paths collide, and `brands/acme` correctly wins all three:
 
 ```
 ./README.md
@@ -99,7 +100,7 @@ after WATCHER (incremental) :  REGULAR FILE (symlink flattened)
 after FULL BUILD            :  symlink (preserved)
 ```
 
-Not reachable today - `shared/` and `brand-acme/` contain zero symlinks - and
+Not reachable today - `shared/` and `brands/acme/` contain zero symlinks - and
 the divergence self-corrects on the next full build, which `npm run dev` runs at
 startup. It would only bite if the boilerplate started shipping symlinks, and
 then only until the next restart. Fixing it means teaching the watcher to detect
@@ -113,15 +114,15 @@ The extraction was validated byte-for-byte against `develop` at commit
 - 87 files, identical MD5 checksums, empty `diff`
 - full tree comparison (110 entries including directories) identical
 - file permissions identical across all 87 files
-- `brand-acme` override precedence confirmed on all three colliding paths
+- brand override precedence confirmed on all three colliding paths
 - `.git`, `.gitmodules` and `.github` confirmed absent from output
 
 The watcher was verified separately against a running preview server:
 
 | Case | Result |
 |---|---|
-| edit a `brand-acme` file | served, no rebuild |
-| edit a `shared` file that `brand-acme` shadows | preview byte-identical; override held |
+| edit a brand file | served, no rebuild |
+| edit a `shared` file that the brand folder shadows | preview byte-identical; override held |
 | edit a `shared`-only file | synced |
 | create a new file | synced |
 | delete a file | removed from target |
@@ -129,4 +130,4 @@ The watcher was verified separately against a running preview server:
 | delete that override | falls back to the shared version |
 | create a new directory with files | synced |
 | `rm -rf` a directory | removed from target |
-| write to `brand-acme/.github/` | not synced (excluded) |
+| write to `brands/acme/.github/` | not synced (excluded) |

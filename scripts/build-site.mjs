@@ -2,17 +2,19 @@
 
 /**
  * Assembles the site the same way `.github/workflows/build-and-sync.yml` does:
- * /shared first, then /brand-acme overlaid on top, with git and CI scaffolding
- * stripped. This is a faithful port of that workflow's assembly steps - the
- * workflow invokes the build, it does not own it.
+ * /shared first, then the active brand's folder under /brands overlaid on top,
+ * with git and CI scaffolding stripped. This is a faithful port of that
+ * workflow's assembly steps - the workflow invokes the build, it does not own
+ * it.
  *
  * Deliberately does NOT do the git half (add/commit/push). It produces an
  * assembled tree and stops.
  *
  * Usage:
- *   node scripts/build-site.mjs [targetDir]
+ *   node scripts/build-site.mjs [targetDir] [--brand=<id>]
  *
  * targetDir defaults to ../aem-poc-preview (the develop worktree).
+ * --brand defaults to acme, so the workflow (which passes no flag) is unchanged.
  */
 
 import {
@@ -27,10 +29,10 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseBrandArg, resolveBrandDir } from './brand.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sharedDir = join(repoRoot, 'shared');
-const brandDir = join(repoRoot, 'brand-acme');
 
 // Entries the publish step leaves alone when it clears the target.
 const PRESERVE_IN_TARGET = new Set(['.git', '.github']);
@@ -40,8 +42,8 @@ function fail(message) {
   process.exit(1);
 }
 
-function resolveTarget(argv) {
-  const requested = argv[2] ?? join(repoRoot, '..', 'aem-poc-preview');
+function resolveTarget(rest) {
+  const requested = rest[0] ?? join(repoRoot, '..', 'aem-poc-preview');
   const target = resolve(requested);
 
   if (target === repoRoot) {
@@ -81,7 +83,7 @@ function stripGitEntries(dir) {
   return removed;
 }
 
-function buildMergedTree() {
+function buildMergedTree(brandDir) {
   const merged = mkdtempSync(join(tmpdir(), 'build-site-'));
 
   copyContentsInto(sharedDir, merged);
@@ -120,23 +122,24 @@ function countFiles(dir) {
 }
 
 function main() {
-  const target = resolveTarget(process.argv);
+  const { brandId, rest } = parseBrandArg(process.argv.slice(2));
+  const brandDir = resolveBrandDir(repoRoot, brandId, 'build-site');
+  const target = resolveTarget(rest);
 
-  for (const [label, dir] of [['shared', sharedDir], ['brand-acme', brandDir]]) {
-    if (!existsSync(dir) || !statSync(dir).isDirectory()) {
-      fail(`${label} not found at ${dir}`);
-    }
+  if (!existsSync(sharedDir) || !statSync(sharedDir).isDirectory()) {
+    fail(`shared not found at ${sharedDir}`);
   }
   if (readdirSync(sharedDir).length === 0) {
     fail('shared/ is empty - run: git submodule update --init');
   }
 
   console.log(`build-site: repo   ${repoRoot}`);
+  console.log(`build-site: brand  ${brandId} (${brandDir})`);
   console.log(`build-site: target ${target}`);
 
-  const { merged, gitEntries } = buildMergedTree();
+  const { merged, gitEntries } = buildMergedTree(brandDir);
   try {
-    console.log(`build-site: merged shared + brand-acme, stripped ${gitEntries} .git entr${gitEntries === 1 ? 'y' : 'ies'}`);
+    console.log(`build-site: merged shared + ${brandId}, stripped ${gitEntries} .git entr${gitEntries === 1 ? 'y' : 'ies'}`);
     const cleared = publishInto(merged, target);
     console.log(`build-site: cleared ${cleared} entr${cleared === 1 ? 'y' : 'ies'} from target (kept .git, .github)`);
     console.log(`build-site: wrote ${countFiles(target)} files`);

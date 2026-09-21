@@ -15,7 +15,7 @@ npm run dev        # http://localhost:3845/
 
 | Path | Purpose |
 |---|---|
-| `brand-acme/` | this brand's overrides — wins over `shared/` |
+| `brands/<id>/` | one brand's overrides per folder — wins over `shared/`. `acme` is the default and only active brand today. |
 | `shared/` | submodule tracking the upstream boilerplate |
 | `scripts/` | build, watch and dev tooling |
 | `.github/` | workflows and CI scripts |
@@ -29,9 +29,10 @@ every publish — never commit to it.
 | Command | Does |
 |---|---|
 | `npm run dev` | full local preview: worktree, build, AEM CLI, file watcher |
+| `npm run dev -- --brand=<id>` | same, for a brand other than the default |
 | `npm run build:site` | assemble the site once |
 | `npm run watch:site` | watch and incrementally copy into an existing build |
-| `npm run lint` | stylelint + eslint over `brand-acme/` |
+| `npm run lint` | stylelint + eslint over `brands/acme/` |
 
 ## Documentation
 

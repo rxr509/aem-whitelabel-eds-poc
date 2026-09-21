@@ -1,7 +1,7 @@
 {
   "name": "aem-whitelabel-eds-poc-lint",
   "private": true,
-  "description": "Lint toolchain for the source branch. Never published - build-and-sync.yml only copies shared/ and brand-acme/ into develop.",
+  "description": "Lint toolchain for the source branch. Never published - build-and-sync.yml only copies shared/ and brands/<id> into develop.",
   "engines": {
     "node": ">=22"
   },
@@ -10,9 +10,9 @@
     "build:site": "node scripts/build-site.mjs",
     "watch:site": "node scripts/watch-site.mjs",
     "lint": "npm run lint:css && npm run lint:js",
-    "lint:css": "stylelint --config shared/.stylelintrc.json --allow-empty-input \"brand-acme/**/*.css\"",
+    "lint:css": "stylelint --config shared/.stylelintrc.json --allow-empty-input \"brands/acme/**/*.css\"",
     "eslintrc": "mkdir -p build && cp shared/.eslintrc.js build/eslintrc.cjs",
-    "lint:js": "npm run eslintrc && eslint --no-eslintrc -c build/eslintrc.cjs --resolve-plugins-relative-to . --no-error-on-unmatched-pattern \"brand-acme/**/*.js\"",
+    "lint:js": "npm run eslintrc && eslint --no-eslintrc -c build/eslintrc.cjs --resolve-plugins-relative-to . --no-error-on-unmatched-pattern \"brands/acme/**/*.js\"",
     "lint:fix": "npm run lint:css -- --fix && npm run lint:js -- --fix"
   },
   "devDependencies": {

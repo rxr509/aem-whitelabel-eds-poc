@@ -7,16 +7,20 @@
  *
  * Usage:
  *   npm run dev
+ *   npm run dev -- --brand=<id>
  */
 
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseBrandArg, resolveBrandDir } from './brand.mjs';
 import { startWatcher } from './watch-site.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const target = resolve(process.argv[2] ?? join(repoRoot, '..', 'aem-poc-preview'));
+const { brandId, rest } = parseBrandArg(process.argv.slice(2));
+const brandDir = resolveBrandDir(repoRoot, brandId, 'dev');
+const target = resolve(rest[0] ?? join(repoRoot, '..', 'aem-poc-preview'));
 const PREVIEW_BRANCH = 'develop';
 
 function git(args, opts = {}) {
@@ -89,7 +93,7 @@ function refreshWorktree() {
 }
 
 function runBuild() {
-  const result = spawnSync(process.execPath, [join(repoRoot, 'scripts', 'build-site.mjs'), target], {
+  const result = spawnSync(process.execPath, [join(repoRoot, 'scripts', 'build-site.mjs'), target, `--brand=${brandId}`], {
     stdio: 'inherit',
   });
   if (result.status !== 0) fail('build failed');
@@ -106,12 +110,13 @@ function startServer(url) {
 }
 
 function main() {
+  console.log(`dev: brand ${brandId} (${brandDir})`);
   ensureWorktree();
   refreshWorktree();
   runBuild();
 
   const server = startServer(previewUrl());
-  const stopWatcher = startWatcher(target);
+  const stopWatcher = startWatcher(target, brandDir);
 
   const shutdown = () => {
     stopWatcher();

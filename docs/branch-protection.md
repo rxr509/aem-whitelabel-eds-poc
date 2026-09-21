@@ -9,7 +9,7 @@ Last verified 2026-09-15.
 
 | Branch | Role |
 |---|---|
-| `source` | Where humans author. Holds `brand-acme/`, the `shared` submodule, and `.github/`. |
+| `source` | Where humans author. Holds `brands/`, the `shared` submodule, and `.github/`. |
 | `develop` | Machine-generated and served by Edge Delivery. Rebuilt from scratch on every sync. |
 | `main` | Not used by this pipeline. Deliberately excluded from all rules. |
 | `automation-state` | Bot-only. Holds `.last-checked.json`, the sync poll state. |
@@ -184,16 +184,16 @@ point also reconsider:
 
 ## Working in this repo without tripping the gates
 
-Author on `source`, in `brand-acme/` or the `shared` submodule. Open a pull
+Author on `source`, under `brands/` or the `shared` submodule. Open a pull
 request into `source`. Four checks must pass; no approval is needed.
 
 See [development.md](development.md) for the build, local preview and the
 gitignore whitelist.
 
 Run `npm run lint` locally before pushing. `Lint` runs `stylelint` over
-`brand-acme/**/*.css` and `eslint` over `brand-acme/**/*.js`, using configs from
-the `shared` submodule — so clone with `--recurse-submodules` or the configs
-will be missing.
+`brands/acme/**/*.css` and `eslint` over `brands/acme/**/*.js`, using configs
+from the `shared` submodule — so clone with `--recurse-submodules` or the
+configs will be missing.
 
 Do not commit to `develop`. Do not commit to `automation-state`.
 
