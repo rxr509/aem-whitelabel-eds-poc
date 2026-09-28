@@ -106,6 +106,71 @@ startup. It would only bite if the boilerplate started shipping symlinks, and
 then only until the next restart. Fixing it means teaching the watcher to detect
 and recreate links rather than copy through them.
 
+## 6. Overriding `head.html` forks it silently — upstream changes are lost
+
+**Affects: `brands/acme/head.html`. Introduced by the Ketch consent work.**
+
+This is issue #1 seen from the other side. The overlay replaces *files* whole;
+it does not merge their contents. `brands/acme/head.html` therefore does not add
+a line to `shared/head.html` — it **replaces it entirely**, and our copy must
+reproduce every tag the shared version ships.
+
+The failure mode is that this is invisible. If Kevin adds a tag to
+`shared/head.html` — a preconnect, an analytics script, a CSP change — the sync
+bot pulls the new `shared` commit, the build succeeds, lint passes, and the
+brand override keeps serving the old markup. Nothing in the pipeline compares
+the two files, so nothing reports a difference. The site silently runs a
+months-old `<head>`.
+
+`head.html` is unusually exposed to this because it is small, central, and the
+natural place for third-party tags to accumulate.
+
+### Provenance of our copy
+
+`brands/acme/head.html` was forked from `shared/head.html` at:
+
+| | |
+|---|---|
+| `shared` submodule commit | `f488dd141b35c701650321d58f26c83b12885e5f` |
+| `head.html` blob | `f55175fc06b2d0574389ff907ea2b284c08f65d1` |
+| MD5 of the shared file at fork time | `533dee4a949f1fe97ab554e582504ba8` |
+
+The blob hash is the useful one: it identifies the exact file contents
+independently of which `shared` commit is checked out, so it stays valid even
+after unrelated submodule bumps.
+
+To check whether upstream has moved since the fork:
+
+```sh
+git -C shared rev-parse HEAD:head.html
+# f55175fc06b2d0574389ff907ea2b284c08f65d1 -> unchanged, override still current
+# anything else                            -> upstream changed, diff and reconcile
+```
+
+And to see what changed:
+
+```sh
+git -C shared diff f55175fc06b2d0574389ff907ea2b284c08f65d1 HEAD:head.html
+diff <(git -C shared show HEAD:head.html) brands/acme/head.html
+```
+
+### Why it is accepted for now
+
+The POC needs one extra `<script>` tag in `<head>` and the overlay offers no
+additive mechanism. The alternatives are worse or larger:
+
+- injecting the tag from `scripts.js` at runtime — delays the consent banner
+  past first paint, which defeats the point of a consent gate
+- asking Kevin to add a brand-agnostic hook to `shared/head.html` — the right
+  long-term fix, but it changes the shared repo for every consumer
+- teaching the build to merge `head.html` fragments — a real feature, and a
+  deliberate decision rather than something to fold into this work
+
+If more files end up overridden this way, the pipeline should grow a drift
+check: assert that each overridden path's upstream blob still matches the hash
+recorded when it was forked, and fail the build when it does not. That is the
+generalisable fix and it is cheap; it just is not in scope here.
+
 ## Verification
 
 The extraction was validated byte-for-byte against `develop` at commit
