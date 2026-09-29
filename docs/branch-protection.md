@@ -191,9 +191,9 @@ See [development.md](development.md) for the build, local preview and the
 gitignore whitelist.
 
 Run `npm run lint` locally before pushing. `Lint` runs `stylelint` over
-`brands/acme/**/*.css` and `eslint` over `brands/acme/**/*.js`, using configs
-from the `shared` submodule — so clone with `--recurse-submodules` or the
-configs will be missing.
+`brands/**/*.css` and `eslint` over `brands/**/*.js` (every brand, not just
+acme), using configs from the `shared` submodule — so clone with
+`--recurse-submodules` or the configs will be missing.
 
 Do not commit to `develop`. Do not commit to `automation-state`.
 
