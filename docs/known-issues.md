@@ -171,6 +171,52 @@ check: assert that each overridden path's upstream blob still matches the hash
 recorded when it was forked, and fail the build when it does not. That is the
 generalisable fix and it is cheap; it just is not in scope here.
 
+## 7. `psg` has no content mount — it serves `develop`'s content, not its own
+
+**Affects: `brands/psg`. Accepted as-is for the POC demo; will need a real fix
+before `psg` is anything more than a styling/config demo.**
+
+Neither `shared/` nor `brands/psg/` ships an `fstab.yaml`. `brands/acme/`
+does, and it is the only one that does. Confirmed by building `psg` and
+inspecting the output tree — there is no `fstab.yaml` in it at all:
+
+```sh
+node scripts/build-site.mjs /tmp/psg-check --brand=psg
+find /tmp/psg-check -iname fstab.yaml   # nothing
+```
+
+`fstab.yaml` is what tells the AEM CLI / Edge Delivery which DA (or other)
+content source backs a page. Without one, a `psg` build has no content mount
+of its own — assembled styling, scripts and config, but no content source.
+
+This has not caused a visible problem yet because of how local preview works,
+not because the gap doesn't exist. `npm run dev` proxies page content through
+the `develop`-branch `aem.page` host, which is derived from the git origin
+remote and is the same host regardless of which brand's static assets are
+active locally. `develop` currently carries the `fstab.yaml` from acme's last
+build (pointing at `rxr509/aem-whitelabel-eds-poc`), so `psg` previews resolve
+content through *that* mount, not one of its own.
+
+Practically: **`psg` today is acme's content, wearing `psg`'s CSS and Ketch
+config.** Any page, fragment, or piece of authored copy a `psg` visitor sees is
+whatever's authored for acme's site. This is fine for a POC that only needs to
+demonstrate per-brand styling and config, and it is a deliberate choice for now
+— not an oversight discovered too late. It becomes a real blocker the moment
+`psg` needs to say anything acme doesn't, e.g. distinct product pages,
+different footer copy, or genuinely independent publishing.
+
+### Why it is accepted for now
+
+Building a second content source is a materially bigger step than adding a
+`head.html` override: it means a `brands/psg/fstab.yaml` pointing at its own DA
+(or other) mount, standing up and authoring that content, and — per
+`docs/development.md` — likely a `psg`-specific `develop`-equivalent branch and
+Edge Delivery registration, since today's pipeline is explicitly
+"single-repo, single-active-brand... there is no per-brand branch or EDS
+registration." That is real infrastructure work, not a config change, and
+doing it just to unblock a demo would be solving a bigger problem than the
+demo needs solved.
+
 ## Verification
 
 The extraction was validated byte-for-byte against `develop` at commit

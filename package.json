@@ -10,9 +10,9 @@
     "build:site": "node scripts/build-site.mjs",
     "watch:site": "node scripts/watch-site.mjs",
     "lint": "npm run lint:css && npm run lint:js",
-    "lint:css": "stylelint --config shared/.stylelintrc.json --allow-empty-input \"brands/acme/**/*.css\"",
+    "lint:css": "stylelint --config shared/.stylelintrc.json --allow-empty-input \"brands/**/*.css\"",
     "eslintrc": "mkdir -p build && cp shared/.eslintrc.js build/eslintrc.cjs",
-    "lint:js": "npm run eslintrc && eslint --no-eslintrc -c build/eslintrc.cjs --resolve-plugins-relative-to . --no-error-on-unmatched-pattern \"brands/acme/**/*.js\"",
+    "lint:js": "npm run eslintrc && eslint --no-eslintrc -c build/eslintrc.cjs --resolve-plugins-relative-to . --no-error-on-unmatched-pattern \"brands/**/*.js\"",
     "lint:fix": "npm run lint:css -- --fix && npm run lint:js -- --fix"
   },
   "devDependencies": {
