@@ -1,6 +1,7 @@
 /*
- * Brand config for acme. Keys here map to /scripts/head/<name>.js files -
- * head-includes.js loads one per key present. Omit a key to turn it off.
+ * Brand config for acme. Keys here must match a name in head-includes.js's
+ * INTEGRATIONS list to load; unlisted keys are ignored with a warning.
+ * Omit a listed key to turn that integration off.
  */
 window.BRAND_CONFIG = {
   ketch: {
