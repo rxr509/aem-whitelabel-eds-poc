@@ -1,10 +1,4 @@
 /*
- * TRANSITIONAL - delete this file once shared/scripts/head/ketch.js exists
- * upstream (see the diff handed to Kevin). Byte-identical across brands
- * today on purpose: it's brand-agnostic, everything comes from
- * window.BRAND_CONFIG.ketch. Do not diverge between brands without good
- * reason - that's what overriding this one file is for once shared ships it.
- *
  * Ketch cookie consent.
  *
  * Loaded by head-includes.js whenever window.BRAND_CONFIG.ketch is present.

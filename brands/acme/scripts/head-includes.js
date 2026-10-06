@@ -1,11 +1,4 @@
 /*
- * TRANSITIONAL - delete this file once shared/scripts/head-includes.js
- * exists upstream (see the diff handed to Kevin). Until then, shared/head.html
- * doesn't load config.js or head-includes.js yet, so every brand using this
- * pattern carries an identical copy. Not a brand customisation point - do not
- * diverge this file between brands; fork shared/scripts/head/<name>.js
- * instead if brand-specific behaviour is needed.
- *
  * Reads window.BRAND_CONFIG and loads one /scripts/head/<name>.js per
  * top-level key present in it. Intentionally generic - it does not hardcode
  * integration names, so a brand can add a new integration by adding a config
