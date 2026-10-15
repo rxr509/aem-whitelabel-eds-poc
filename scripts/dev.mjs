@@ -18,7 +18,7 @@ import { parseBrandArg, resolveBrandDir } from './brand.mjs';
 import { startWatcher } from './watch-site.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const { brandId, rest } = parseBrandArg(process.argv.slice(2));
+const { brandId, rest } = parseBrandArg(process.argv.slice(2), { prefix: 'dev', npmScript: 'dev' });
 const brandDir = resolveBrandDir(repoRoot, brandId, 'dev');
 const target = resolve(rest[0] ?? join(repoRoot, '..', 'aem-poc-preview'));
 const PREVIEW_BRANCH = 'develop';
